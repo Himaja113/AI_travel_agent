@@ -1,0 +1,10 @@
+streamlit
+langchain
+langgraph
+groq
+requests
+pymongo
+python-dotenv
+folium
+streamlit-folium
+geopy
