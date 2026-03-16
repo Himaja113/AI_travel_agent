@@ -1,6 +1,8 @@
 from utils.llm import generate_response
 
 def activity_agent(state):
+    if "iterations" not in state:
+        state["iterations"] = 0
 
     prompt = f"""
 You are an expert travel planner.

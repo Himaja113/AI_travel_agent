@@ -25,7 +25,8 @@ if st.session_state.result:
 
     st.subheader("📅 Your Travel Plan")
     st.write(result["itinerary"])
-
+    st.subheader("🧠 AI Critic Review")
+    st.write(result["critique"])
     st.subheader("🗺 Attractions Map")
     map_obj, total_distance = create_map(result["attractions"])
 

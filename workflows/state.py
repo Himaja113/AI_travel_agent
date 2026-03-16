@@ -1,5 +1,6 @@
 from typing import TypedDict, List
 
+
 class TravelState(TypedDict):
 
     departure_city: str
@@ -13,3 +14,5 @@ class TravelState(TypedDict):
     attractions: list
     weather: dict
     itinerary: str
+    critique: str
+    iterations: int
