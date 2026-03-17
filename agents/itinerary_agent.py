@@ -33,7 +33,15 @@ Real-world travel distances and times between attractions:
 Instructions:
 1. Day 1: Plan travel from {state['departure_city']} to {state['destination']}. **You MUST identify and name specific airports** (e.g., Narita Airport, Heathrow Airport) and mention the flight/train numbers if possible.
 2. Means of Transport: For EVERY leg of the journey (airport to hotel, hotel to attraction, city to city), **you MUST specify the means of transport** (e.g., "Take the JR Yamanote Line train", "Hire a private cab", "Take the Metro Line 4").
-3. Travel Mode: Respect the user's preference for "{state.get('travel_mode', 'Any')}" where feasible, especially for domestic travel.
+3. Travel Mode (PREFERENCE WITH TRANSPARENT FALLBACKS): The user's preference is "{state.get('travel_mode', 'Any')}".
+   - General rule: Use the preferred mode wherever it is realistically available and sensible. If it is NOT available/feasible (due to borders, oceans, extreme duration vs trip dates, or no practical routes), you MAY switch modes, but you MUST:
+     (a) state the switch clearly at the very beginning (one short paragraph), and
+     (b) explain the reason in plain language.
+   - If it is "Bus": Prefer buses/coaches for intercity legs. If the main long-haul leg cannot be done by bus in the given dates (or is not practical), switch to the most realistic mode for that leg (often flight), and disclose it as above.
+   - If it is "Train": Prefer trains. If an unavoidable non-train segment exists, use the closest alternative and disclose it.
+   - If it is "Flight": Prefer flights for long-haul legs.
+   - If it is "Metro/Cab": Treat this as local-in-city preference (still choose a sensible intercity mode).
+   - If it is "Any": Choose the most reasonable option
 4. Plan activities around the attractions listed above.
 5. Consider weather conditions while planning outdoor activities.
 6. Respect the given budget of ${state['budget']}. **If this budget is clearly insufficient** for the requested duration, destination, and essentials (like flights), provide a realistic itinerary anyway but **explicitly state at the very beginning**: "⚠️ WARNING: Provided budget of ${state['budget']} is insufficient. A realistic budget for this trip would be approximately $X."

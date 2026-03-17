@@ -4,6 +4,19 @@ from workflows.travel_graph import build_travel_graph
 from utils.map_utils import create_map
 from streamlit_folium import st_folium
 import time
+import re
+
+
+def _escape_dollars_for_streamlit_markdown(text: str) -> str:
+    """
+    Streamlit's Markdown treats `$...$` as LaTeX math, which makes text italic and
+    collapses spaces. Escape dollar signs so currency renders as normal text.
+    """
+    if not isinstance(text, str) or "$" not in text:
+        return text
+
+    # Replace unescaped $ with \$
+    return re.sub(r"(?<!\\)\$", r"\\$", text)
 
 # Page Config
 st.set_page_config(
@@ -210,7 +223,7 @@ if st.session_state.get('result'):
 
     with tab1:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        st.markdown(result["itinerary"])
+        st.markdown(_escape_dollars_for_streamlit_markdown(result["itinerary"]))
         st.markdown('</div>', unsafe_allow_html=True)
 
     with tab2:
@@ -231,7 +244,7 @@ if st.session_state.get('result'):
 
     with tab3:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        st.markdown(result["critique"])
+        st.markdown(_escape_dollars_for_streamlit_markdown(result["critique"]))
         st.markdown('</div>', unsafe_allow_html=True)
     
     if st.button("🔄 Create New Exploration"):
@@ -239,3 +252,6 @@ if st.session_state.get('result'):
         st.rerun()
 
 st.markdown("<br><br><p style='text-align: center; color: #475569; font-size: 0.8rem;'>Powered by LangGraph & Premium Agentic Orchestration</p>", unsafe_allow_html=True)
+
+
+
