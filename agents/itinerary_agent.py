@@ -44,10 +44,13 @@ Instructions:
    - If it is "Any": Choose the most reasonable option
 4. Plan activities around the attractions listed above.
 5. Consider weather conditions while planning outdoor activities.
-6. Respect the given budget of ${state['budget']}. **If this budget is clearly insufficient** for the requested duration, destination, and essentials (like flights), provide a realistic itinerary anyway but **explicitly state at the very beginning**: "⚠️ WARNING: Provided budget of ${state['budget']} is insufficient. A realistic budget for this trip would be approximately $X."
+6. Respect the given budget of ${state['budget']}. 
+   - **Grounding Math**: Use these standard estimates: Flight ($600-$1000), Hotel ($100-$200/night), Food/Local ($50-$100/day).
+   - **Recommended Budget**: If "Previous Feedback" suggested a specific minimum budget (e.g., $7000), prioritize that number and explain why it's needed.
+   - **Warning**: If the budget is still insufficient, provide a realistic itinerary anyway but **explicitly state at the very beginning**: "⚠️ WARNING: Provided budget of ${state['budget']} is insufficient. A realistic budget for this trip would be approximately $X."
 7. Include morning, afternoon, and evening activities.
 8. **Include Return Trip**: On the last day ({state['end_date']}), include the travel back from {state['destination']} to {state['departure_city']}, specifying the return airport/station and transport mode.
-9. IF there is "Previous Feedback", address it specifically.
+9. IF there is "Previous Feedback", address it specifically. Use its budget recommendations to achieve a stable, consistent plan.
 
 Return the itinerary clearly, including precise names of stations and transport lines, and end with a **Budget Table** in this format:
 | Category | Details | Cost ($) |

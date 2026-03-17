@@ -12,7 +12,9 @@ Check for:
 - unrealistic travel distances (use the "Travel Summary" below for ground truth)
 - too many places in a single day
 - ignoring weather conditions
-- budget violations (YOU MUST MANUALLY SUM THE COSTS IN THE ITINERARY AND FLAG ANY MATH ERRORS). **If the budget is violated**, explicitly suggest what the total required budget should be.
+- budget violations (YOU MUST MANUALLY SUM THE COSTS IN THE ITINERARY AND FLAG ANY MATH ERRORS). 
+   - **Grounding Math**: Use these standard estimates for Japan: Flights ($800-$1200), Hotels ($150/night), Daily Food/Transport ($80/day). 
+   - **Consistency**: If you suggested a budget in a previous iteration (e.g., $7000), do NOT increase it further unless the itinerary changed significantly.
 - missing or vague transportation details (Must specify train lines, metro, or mode of travel)
 - missing specific airport names for arrival/departure
 - missing return trip to {state['departure_city']} on the final day

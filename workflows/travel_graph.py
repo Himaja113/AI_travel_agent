@@ -21,8 +21,8 @@ def critic_decision(state):
         return "end"
 
     # stop if iteration limit reached
-    if state["iterations"] >= 4:
-        print("Max iterations reached (4). Stopping.")
+    if state["iterations"] >= 3:
+        print("Max iterations reached (3). Stopping.")
         return "end"
 
     print("Plan rejected. Routing to refiner for feedback summary.")
