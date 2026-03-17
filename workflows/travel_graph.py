@@ -10,22 +10,22 @@ from agents.refiner_agent import refiner_agent
 
 
 def critic_decision(state):
-
-    state["iterations"] += 1
-
+    iterations = state.get("iterations", 0)
     critique = state["critique"].lower()
 
-    print(f"Iteration: {state['iterations']}")
-
+    print(f"--- Critic Decision for Iteration {iterations} ---")
+    
     # stop if score is good
     if "score: 8" in critique or "score: 9" in critique or "score: 10" in critique:
+        print("Plan accepted by critic.")
         return "end"
 
     # stop if iteration limit reached
     if state["iterations"] >= 2:
-        print("Max iterations reached")
+        print("Max iterations reached (2). Stopping.")
         return "end"
 
+    print("Plan rejected. Routing to refiner for feedback summary.")
     return "refine"
 
 def build_travel_graph():
@@ -55,7 +55,7 @@ def build_travel_graph():
     }
 )
 
-    graph.add_edge("refiner_agent", "critic_agent")
+    graph.add_edge("refiner_agent", "activity_agent")
 
     return graph.compile()
 # from langgraph.graph import StateGraph, END

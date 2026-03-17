@@ -2,28 +2,25 @@ from utils.llm import generate_response
 
 
 def refiner_agent(state):
-
     prompt = f"""
-You are improving a travel itinerary based on critic feedback.
+You are a travel expert summarizing feedback for a travel plan.
 
-Original itinerary:
+Current Itinerary:
 {state["itinerary"]}
 
-Critic feedback:
+Critic Feedback:
 {state["critique"]}
 
-Rewrite the itinerary so that:
-- travel distances are realistic
-- activities per day are manageable
-- travel order is efficient
-- budget constraints are respected
+Task:
+Identify the top 3-5 specific issues that need fixing and provide clear, actionable suggestions for the travel planner to rewrite the itinerary. 
+Do NOT provide the full itinerary. Just provide the summary of needed changes.
 
-Return the FULL revised itinerary.
+Format:
+Summary of Issues:
+Actionable Suggestions:
 """
-
-    improved_plan = generate_response(prompt)
-
-    # IMPORTANT: overwrite itinerary
-    state["itinerary"] = improved_plan
-
+    summary = generate_response(prompt)
+    
+    # Store the summary in the state so the activity agent can use it
+    state["feedback_summary"] = summary
     return state

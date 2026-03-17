@@ -15,4 +15,7 @@ class TravelState(TypedDict):
     weather: dict
     itinerary: str
     critique: str
+    feedback_summary: str
+    travel_summary: str
+    travel_mode: str
     iterations: int
