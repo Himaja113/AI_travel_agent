@@ -84,8 +84,5 @@ The workflow follows a directed acyclic graph (DAG) managed by LangGraph:
 
 ---
 
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for more information.
-
 ---
 *Built with ❤️ by the VoyageAI Team*
