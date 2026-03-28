@@ -4,6 +4,8 @@ import re
 import streamlit as st
 from streamlit_folium import st_folium
 
+from ui.effects import UI_EFFECTS_CSS
+from ui.fx_bridge import render_fx_bridge
 from ui.home_motion import HOME_LANDING_MOTION_CSS
 from ui.theme import NOMAD_EDITORIAL_CSS
 from ui.travel_form import get_user_input
@@ -57,18 +59,14 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown(
-    f"<style>{NOMAD_EDITORIAL_CSS}</style>",
-    unsafe_allow_html=True,
-)
-
 has_result = bool(st.session_state.get("result"))
 
+_style = NOMAD_EDITORIAL_CSS + UI_EFFECTS_CSS
 if not has_result:
-    st.markdown(
-        f"<style>{HOME_LANDING_MOTION_CSS}</style>",
-        unsafe_allow_html=True,
-    )
+    _style += HOME_LANDING_MOTION_CSS
+st.markdown(f"<style>{_style}</style>", unsafe_allow_html=True)
+
+if not has_result:
     st.markdown(
         """
         <div class="va-home-parallax-root">
@@ -105,9 +103,8 @@ if not has_result:
         unsafe_allow_html=True,
     )
 
-    st.markdown('<div class="va-panel">', unsafe_allow_html=True)
-    user_data = get_user_input(compact=False)
-    st.markdown("</div>", unsafe_allow_html=True)
+    with st.container(border=True):
+        user_data = get_user_input(compact=False)
 else:
     with st.sidebar:
         st.markdown(
@@ -120,9 +117,8 @@ else:
             """,
             unsafe_allow_html=True,
         )
-        st.markdown('<div class="va-panel va-panel-tight">', unsafe_allow_html=True)
-        user_data = get_user_input(compact=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            user_data = get_user_input(compact=True)
 
 if user_data["generate"]:
     errors = _validate_trip(user_data)
@@ -142,6 +138,7 @@ if user_data["generate"]:
             graph = _travel_graph()
             result = graph.invoke(user_data)
             st.session_state.result = result
+            st.session_state._va_show_celebration = True
             status.update(label="Itinerary ready", state="complete", expanded=False)
 
 if st.session_state.get("result"):
@@ -149,9 +146,24 @@ if st.session_state.get("result"):
     dest = result.get("destination", "Your trip")
     dest_safe = html.escape(str(dest))
 
+    if st.session_state.pop("_va_show_celebration", False):
+        st.markdown(
+            """
+            <div class="va-celebrate-layer" aria-hidden="true">
+                <div class="va-celebrate-confetti">
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="va-celebrate-ring"></div>
+                <span class="va-celebrate-check">✓</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     st.markdown(
         f"""
-        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="va-trip-header va-scroll-reveal" style="display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
             <h2 style="margin: 0; font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2rem);">
                 {dest_safe}
             </h2>
@@ -186,7 +198,7 @@ if st.session_state.get("result"):
     with tab1:
         _it = _escape_dollars_for_streamlit_markdown(result["itinerary"])
         st.markdown(
-            f'<div class="va-panel va-prose">\n\n{_it}\n\n</div>',
+            f'<div class="va-panel va-prose va-panel-aurora va-scroll-reveal">\n\n{_it}\n\n</div>',
             unsafe_allow_html=True,
         )
 
@@ -222,7 +234,7 @@ if st.session_state.get("result"):
             )
         _cr = _escape_dollars_for_streamlit_markdown(result["critique"])
         st.markdown(
-            f'<div class="va-panel va-prose">\n\n{_cr}\n\n</div>',
+            f'<div class="va-panel va-prose va-panel-aurora va-scroll-reveal">\n\n{_cr}\n\n</div>',
             unsafe_allow_html=True,
         )
 
@@ -231,3 +243,5 @@ st.markdown(
     "font-family:var(--font-ui);opacity:0.85;'>LangGraph · Stitch design system · Nomad Editorial</p>",
     unsafe_allow_html=True,
 )
+
+render_fx_bridge(landing=not bool(st.session_state.get("result")))
