@@ -4,6 +4,7 @@ import re
 import streamlit as st
 from streamlit_folium import st_folium
 
+from ui.home_motion import HOME_LANDING_MOTION_CSS
 from ui.theme import NOMAD_EDITORIAL_CSS
 from ui.travel_form import get_user_input
 from utils.map_utils import create_map
@@ -65,36 +66,39 @@ has_result = bool(st.session_state.get("result"))
 
 if not has_result:
     st.markdown(
-        """
-        <div class="va-hero-wrap">
-            <span class="va-eyebrow">Multi-agent orchestration</span>
-            <h1 class="va-hero-title">VoyageAI</h1>
-            <p class="va-hero-lede">
-                A concierge-style trip planner: routes, weather, attractions, and budget reasoning
-                orchestrated through LangGraph—editorial clarity, instrument-panel precision.
-            </p>
-        </div>
-        """,
+        f"<style>{HOME_LANDING_MOTION_CSS}</style>",
         unsafe_allow_html=True,
     )
-
     st.markdown(
         """
-        <div class="va-bento-grid">
-            <div class="va-bento">
-                <div class="va-bento-num">01 — Discover</div>
-                <h3>Grounded places</h3>
-                <p>Attractions and pacing informed by real geography—not generic listicles.</p>
+        <div class="va-home-parallax-root">
+            <div class="va-home-mesh va-home-mesh--a" aria-hidden="true"></div>
+            <div class="va-home-mesh va-home-mesh--b" aria-hidden="true"></div>
+            <div class="va-home-mesh va-home-mesh--c" aria-hidden="true"></div>
+            <div class="va-hero-wrap va-home-hero-float">
+                <span class="va-eyebrow">Multi-agent orchestration</span>
+                <h1 class="va-hero-title">VoyageAI</h1>
+                <p class="va-hero-lede">
+                    A concierge-style trip planner: routes, weather, attractions, and budget reasoning
+                    orchestrated through LangGraph—editorial clarity, instrument-panel precision.
+                </p>
             </div>
-            <div class="va-bento">
-                <div class="va-bento-num">02 — Curate</div>
-                <h3>Agent synergy</h3>
-                <p>Weather, logistics, and experience agents refine the loop until the plan holds up.</p>
-            </div>
-            <div class="va-bento">
-                <div class="va-bento-num">03 — Explore</div>
-                <h3>Budget you can trust</h3>
-                <p>Cost estimates and sanity checks so the itinerary stays within what you set.</p>
+            <div class="va-bento-grid">
+                <div class="va-bento">
+                    <div class="va-bento-num">01 — Discover</div>
+                    <h3>Grounded places</h3>
+                    <p>Attractions and pacing informed by real geography—not generic listicles.</p>
+                </div>
+                <div class="va-bento">
+                    <div class="va-bento-num">02 — Curate</div>
+                    <h3>Agent synergy</h3>
+                    <p>Weather, logistics, and experience agents refine the loop until the plan holds up.</p>
+                </div>
+                <div class="va-bento">
+                    <div class="va-bento-num">03 — Explore</div>
+                    <h3>Budget you can trust</h3>
+                    <p>Cost estimates and sanity checks so the itinerary stays within what you set.</p>
+                </div>
             </div>
         </div>
         """,
