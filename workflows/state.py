@@ -23,6 +23,6 @@ class TravelState(TypedDict):
     travel_summary: str
     travel_mode: str
     iterations: int
-
     book_tickets: NotRequired[bool]
     booking_links: NotRequired[str]
+    live_transit_schedules: NotRequired[str]
