@@ -84,7 +84,6 @@ def get_user_input(*, compact: bool = False) -> dict:
             horizontal=False,
             key="t_mode",
         )
-
     st.markdown('<div style="height: 0.5rem;"></div>', unsafe_allow_html=True)
 
     book_tickets = st.checkbox(
@@ -98,7 +97,6 @@ def get_user_input(*, compact: bool = False) -> dict:
         use_container_width=True,
         type="primary",
     )
-
     return {
         "departure_city": departure_city,
         "destination": destination,

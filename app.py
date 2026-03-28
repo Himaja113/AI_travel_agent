@@ -196,7 +196,6 @@ if st.session_state.get("result"):
     tab1, tab2, tab3, tab4 = st.tabs(
         ["Itinerary", "Map & distance", "Agent critique", "Bookings"]
     )
-
     with tab1:
         _it = _escape_dollars_for_streamlit_markdown(result["itinerary"])
         st.markdown(
@@ -210,7 +209,6 @@ if st.session_state.get("result"):
             st_folium(map_obj, width=None, height=580, use_container_width=True)
         else:
             st.warning("No map data available for these attractions.")
-
         with st.container(border=True):
             m1, m2 = st.columns(2)
             with m1:
@@ -228,7 +226,6 @@ if st.session_state.get("result"):
                         _normalize_feedback_display(result["feedback_summary"])
                     )
                 )
-
     with tab3:
         with st.expander("About this review", expanded=False):
             st.caption(
