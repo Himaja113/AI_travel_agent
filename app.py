@@ -198,10 +198,7 @@ if user_data["generate"]:
         st.markdown('<div class="status-msg">📍 <b>Destination Specialist:</b> Curating world-class attractions...</div>', unsafe_allow_html=True)
         time.sleep(1)
         
-        st.markdown('<div class="status-msg">🌦️ <b>Weather Analyst:</b> Synchronizing activities with 3-day forecast...</div>', unsafe_allow_html=True)
-        time.sleep(1)
-        
-        st.markdown('<div class="status-msg">🛤️ <b>Logistics Architect:</b> Computing real-world road path efficiency...</div>', unsafe_allow_html=True)
+        st.markdown('<div class="status-msg">🚀 <b>Parallel Gatherer:</b> Fetching weather, routes, and live APIs concurrently...</div>', unsafe_allow_html=True)
         time.sleep(1)
         
         st.markdown('<div class="status-msg">📅 <b>Experience Designer:</b> Finalizing interactive daily itinerary...</div>', unsafe_allow_html=True)
@@ -210,6 +207,7 @@ if user_data["generate"]:
         result = graph.invoke(user_data)
         
         st.markdown('<div class="status-msg">🧠 <b>Quality Assurance:</b> Critiquing plan for maximum feasibility...</div>', unsafe_allow_html=True)
+        st.markdown('<div class="status-msg">🎟️ <b>Booking Concierge:</b> Retrieving live ticket portals...</div>', unsafe_allow_html=True)
         st.session_state.result = result
         status.update(label="✨ **Voyage Masterpiece Complete**", state="complete", expanded=False)
 
@@ -219,7 +217,7 @@ if st.session_state.get('result'):
     st.markdown(f'<h2 style="margin-bottom: 2rem;">🌟 Trip to {result["destination"]}</h2>', unsafe_allow_html=True)
     
     # Dashboard Layout
-    tab1, tab2, tab3 = st.tabs(["🗓️ Master Itinerary", "🗺️ Smart Routes", "🔬 Agent Critique"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🗓️ Master Itinerary", "🗺️ Smart Routes", "🔬 Agent Critique", "🎟️ Bookings"])
 
     with tab1:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
@@ -245,6 +243,14 @@ if st.session_state.get('result'):
     with tab3:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown(_escape_dollars_for_streamlit_markdown(result["critique"]))
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with tab4:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        if result.get("booking_links"):
+            st.markdown(result["booking_links"])
+        else:
+            st.info("No booking links requested or generated.")
         st.markdown('</div>', unsafe_allow_html=True)
     
     if st.button("🔄 Create New Exploration"):

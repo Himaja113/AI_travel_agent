@@ -39,6 +39,7 @@ def get_user_input():
         )
 
     st.markdown("<br>", unsafe_allow_html=True)
+    book_tickets = st.checkbox("🎟️ Include Booking Links?", value=True, help="We'll generate direct links to book your flights, trains, or buses.", key="book_tix")
     generate = st.button("✨ Generate My Masterpiece", use_container_width=True)
 
     return {
@@ -50,5 +51,6 @@ def get_user_input():
         "travelers": travelers,
         "interests": interests,
         "travel_mode": travel_mode,
+        "book_tickets": book_tickets,
         "generate": generate
     }

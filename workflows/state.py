@@ -19,3 +19,6 @@ class TravelState(TypedDict):
     travel_summary: str
     travel_mode: str
     iterations: int
+    book_tickets: bool
+    booking_links: str
+    live_transit_schedules: str
