@@ -86,6 +86,13 @@ def get_user_input(*, compact: bool = False) -> dict:
         )
 
     st.markdown('<div style="height: 0.5rem;"></div>', unsafe_allow_html=True)
+
+    book_tickets = st.checkbox(
+        "Include booking links (when the workflow provides them)",
+        value=True,
+        key="book_tix",
+    )
+
     generate = st.button(
         "Generate itinerary",
         use_container_width=True,
@@ -101,5 +108,6 @@ def get_user_input(*, compact: bool = False) -> dict:
         "travelers": travelers,
         "interests": interests,
         "travel_mode": travel_mode,
+        "book_tickets": book_tickets,
         "generate": generate,
     }

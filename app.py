@@ -193,7 +193,9 @@ if st.session_state.get("result"):
             st.session_state.result = None
             st.rerun()
 
-    tab1, tab2, tab3 = st.tabs(["Itinerary", "Map & distance", "Agent critique"])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Itinerary", "Map & distance", "Agent critique", "Bookings"]
+    )
 
     with tab1:
         _it = _escape_dollars_for_streamlit_markdown(result["itinerary"])
@@ -237,6 +239,19 @@ if st.session_state.get("result"):
             f'<div class="va-panel va-prose va-panel-aurora va-scroll-reveal">\n\n{_cr}\n\n</div>',
             unsafe_allow_html=True,
         )
+
+    with tab4:
+        _bl = (result.get("booking_links") or "").strip()
+        if _bl and user_data.get("book_tickets", True):
+            _blp = _escape_dollars_for_streamlit_markdown(_bl)
+            st.markdown(
+                f'<div class="va-panel va-prose va-panel-aurora va-scroll-reveal">\n\n{_blp}\n\n</div>',
+                unsafe_allow_html=True,
+            )
+        elif not user_data.get("book_tickets", True):
+            st.info('Booking links were not requested. Turn on "Include booking links" and run again.')
+        else:
+            st.info("No booking links in this result yet. Your LangGraph branch can populate `booking_links` in state.")
 
 st.markdown(
     "<br><p style='text-align:center;color:var(--on-surface-variant);font-size:0.75rem;"
