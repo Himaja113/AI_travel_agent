@@ -52,9 +52,9 @@ Instructions:
 8. **Include Return Trip**: On the last day ({state['end_date']}), include the travel back from {state['destination']} to {state['departure_city']}, specifying the return airport/station and transport mode.
 9. IF there is "Previous Feedback", address it specifically. Use its budget recommendations to achieve a stable, consistent plan.
 
-Return the itinerary clearly, including precise names of stations and transport lines, and end with a **Budget Table** in this format:
+Return the itinerary clearly, including precise names of stations and transport lines, and end with a **Budget Table** in this format (keep the 3-column layout; use plain numbers in the last column like `1800` or `1142.50` without breaking across lines):
 | Category | Details | Cost ($) |
-| :--- | :--- | :--- |
+| :--- | :--- | ---: |
 | Flights | ... | ... |
 | Accommodation | ... | ... |
 | Transport | ... | ... |
