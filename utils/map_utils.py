@@ -8,24 +8,37 @@ def create_map(attractions):
         return None, 0
 
     # Center map on first attraction
-    first = attractions[0]
-
     m = folium.Map(
-        location=[first["lat"], first["lng"]],
-        zoom_start=12,
         tiles="CartoDB positron"  # clean English map
     )
+
+    # Calculate bounds
+    locs = [[p["lat"], p["lng"]] for p in attractions]
+    m.fit_bounds(locs)
+
+    # Color Mapping for Multiple Cities
+    city_colors = ["cadetblue", "darkgreen", "darkpurple", "orange", "red", "black"]
+    unique_cities = []
+    for attr in attractions:
+        c = attr.get("city", "Unknown")
+        if c not in unique_cities:
+            unique_cities.append(c)
+    
+    city_to_color = {city: city_colors[i % len(city_colors)] for i, city in enumerate(unique_cities)}
 
     total_distance = 0
 
     for i, place in enumerate(attractions):
         lat = place["lat"]
         lng = place["lng"]
+        city = place.get("city", "Unknown")
+        color = city_to_color.get(city, "cadetblue")
 
         # Add numbered marker with detailed popup
         popup_html = f"""
         <div style="font-family: 'Outfit', sans-serif; min-width: 150px;">
             <h4 style="margin: 0; color: #1e3a8a;">{i+1}. {place['name']}</h4>
+            <p style="margin: 5px 0; font-size: 13px;">📍 <b>{city}</b></p>
             <p style="margin: 5px 0;">⭐ <b>{place.get('rating','N/A')}</b></p>
             <p style="margin: 0; font-size: 12px; color: #64748b;">{place.get('address', '')}</p>
         </div>
@@ -34,8 +47,8 @@ def create_map(attractions):
         folium.Marker(
             location=[lat, lng],
             popup=folium.Popup(popup_html, max_width=300),
-            tooltip=place["name"],
-            icon=folium.Icon(color="cadetblue", icon="map-pin", prefix='fa')
+            tooltip=f"{place['name']} ({city})",
+            icon=folium.Icon(color=color, icon="map-pin", prefix='fa')
         ).add_to(m)
 
         # Draw real routes between places

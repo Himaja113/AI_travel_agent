@@ -33,24 +33,34 @@ def get_user_input(*, compact: bool = False) -> dict:
     col1, col2 = st.columns(2)
     with col1:
         departure_city = st.text_input(
-            "Departure",
+            "Departure City",
             placeholder="e.g. Delhi",
             key="dep_city",
         )
         start_date = st.date_input("Start date", key="s_date")
-        budget = st.number_input("Total budget (USD)", min_value=100, step=100, value=2000, key="bgt")
+        
+        currency_options = ["USD ($)", "EUR (€)", "GBP (£)", "INR (₹)", "JPY (¥)"]
+        currency_raw = st.selectbox("Currency", currency_options, key="curr")
+        currency = currency_raw.split("(")[1].replace(")", "") # Extract just the symbol
+
+        auto_budget = st.checkbox("Calculate Estimated Budget for me", key="auto_bgt")
+        if auto_budget:
+            budget = 0
+            st.markdown("<div style='min-height: 48px; display: flex; align-items: center;'><span style='color: var(--primary); font-size: 0.85rem;'>✦ AI will calculate the optimal budget based on local standards.</span></div>", unsafe_allow_html=True)
+        else:
+            budget = st.number_input("Total budget", min_value=100, step=100, value=2000, key="bgt")
 
     with col2:
         destination = st.text_input(
-            "Destination",
-            placeholder="e.g. Lisbon",
+            "Destination City",
+            placeholder="e.g. Mumbai",
             key="dest_city",
         )
         end_date = st.date_input("End date", key="e_date")
-        travelers = st.number_input("Travelers", min_value=1, step=1, value=1, key="travs")
+        travelers = st.number_input("Number of travelers", min_value=1, step=1, value=1, key="travs")
 
     nights_l, per_l = _trip_stats(start_date, end_date, float(budget), int(travelers))
-    if nights_l and per_l:
+    if not auto_budget and nights_l and per_l:
         st.markdown(
             f"""
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.25rem 0 1rem;">
@@ -59,7 +69,7 @@ def get_user_input(*, compact: bool = False) -> dict:
                     background: var(--secondary-dim); padding: 0.35rem 0.75rem; border-radius: 9999px;">{nights_l}</span>
                 <span style="font-family: var(--font-ui); font-size: 0.72rem; font-weight: 600;
                     letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary-container);
-                    background: rgba(212, 165, 116, 0.12); padding: 0.35rem 0.75rem; border-radius: 9999px;">{per_l}</span>
+                    background: rgba(77, 220, 198, 0.12); padding: 0.35rem 0.75rem; border-radius: 9999px;">{per_l}</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -72,8 +82,8 @@ def get_user_input(*, compact: bool = False) -> dict:
     col3, col4 = st.columns(2)
     with col3:
         interests = st.multiselect(
-            "Interests",
-            ["food", "culture", "nature", "shopping", "nightlife", "history"],
+            "Interests & Vibes",
+            ["food", "culture", "nature", "shopping", "adventure", "nightlife", "history"],
             default=["culture", "food"],
             key="ints",
         )
@@ -87,7 +97,7 @@ def get_user_input(*, compact: bool = False) -> dict:
     st.markdown('<div style="height: 0.5rem;"></div>', unsafe_allow_html=True)
 
     book_tickets = st.checkbox(
-        "Include booking links (when the workflow provides them)",
+        "Include booking links (when available)",
         value=True,
         key="book_tix",
     )
@@ -103,6 +113,8 @@ def get_user_input(*, compact: bool = False) -> dict:
         "start_date": start_date,
         "end_date": end_date,
         "budget": budget,
+        "auto_budget": auto_budget,
+        "currency": currency,
         "travelers": travelers,
         "interests": interests,
         "travel_mode": travel_mode,

@@ -1,105 +1,87 @@
 from utils.llm import generate_response
 
 def activity_agent(state):
-    # Increment iterations here so it persists in the state
     state["iterations"] = state.get("iterations", 0) + 1
-    
-    feedback = state.get("feedback_summary", "None")
     
     print(f"--- Activity Agent Starting (Iteration {state['iterations']}) ---")
 
     prompt = f"""
-You are an expert travel planner.
+You are an expert travel planner producing masterpiece itineraries.
 
-Trip Details:
-Departure City: {state['departure_city']}
-Destination: {state['destination']}
-Start Date: {state['start_date']}
-End Date: {state['end_date']}
-Budget: ${state['budget']}
-Travelers: {state['travelers']}
-Interests: {state['interests']}
-Preferred Travel Mode: {state.get('travel_mode', 'Any')}
+### 🟢 CONTEXT:
+Trip: {state['departure_city']} to {state['destination']} ({state['start_date']} to {state['end_date']})
+Travelers: {state['travelers']} | Interests: {state['interests']}
+Preferred Mode: {state.get('travel_mode', 'Any')}
+Attractions Data: {state['attractions']}
+Transit Data: {state.get('live_transit_schedules', 'None')}
 
-Weather at destination:
-{state['weather']}
+### 🚀 THE 9 PILLARS OF TRAVEL LOGIC (MANDATORY):
+1. **MANDATORY OUTBOUND & RETURN TRAVEL**: 
+   - Day 1 MUST start with the travel journey (flight/train) from {state['departure_city']}. 
+   - The Final Day MUST include the return journey back to {state['departure_city']}. DO NOT skip the return trip.
+2. **HIGH-DENSITY DAYS (MAXIMIZATION)**: 
+   - A day is not fully utilized with just 1 attraction. You MUST plan 2 to 3 geographically grouped attractions per day (Morning, Afternoon, Evening) to maximize the schedule before 6:00 PM.
+3. **ABSTRACT MORNING RESET**: 
+   - Every day (Day 2+) starts by departing from your "central hotel". Use exact wording: "Transport: Travel from your central hotel to [Attraction]." DO NOT name a specific hotel or neighborhood in the morning transport step. This prevents the "Migrating Hotel" hallucination.
+4. **ZERO-REPETITION (DEAD-LOCK)**: 
+   - Each attraction can be visited exactly ONCE. Zero repeat visits.
+5. **STRICT INTEREST TAXONOMY**: 
+   - 'Adventure' means physical/gaming. 'Food' means eating. 'Culture' means monuments. Ensure labels are accurate.
+6. **GEOGRAPHIC GROUNDING & OPTIMAL PATH**: 
+   - Group daily activities by neighborhood. You MUST plan the attractions in an optimal geographical sequence (A -> B -> C) to minimize transit time.
+   - No 25km (e.g. Suburbs to South Mumbai) trips just for lunch. You cannot claim a 25km trip is a "Walk" or "5 mins".
+7. **THE HALT TRIGGER & PROXIMITY EXTENSIONS**: 
+   - If you run out of unique sites, STOP the city plan immediately. Jump to Extensions. 
+   - **Proximity Logic**: Suggest cities in the SAME STATE (if city visit) or ANY STATE (if country visit).
+   - **Multi-City Pathing**: If many vacation days remain, suggest a chained multi-city travel path (e.g., Destination -> City A -> City B -> Home) that creates an optimal geographic route back to the user's departure city.
+8. **DUAL-FORMAT EXTENSION SUGGESTIONS**: 
+   - You MUST provide exactly two sections at the bottom for extensions. Do NOT echo these rules in your final output.
+   - **Single-City Extensions**: List 2-3 cities. MUST be in the SAME STATE for city visits (or ANY STATE for country visits). Include "~X hours" and "optimal stay: Y days".
+   - **Multi-City Chained Routes**: If remaining vacation days exceed the optimal stay of one city, you MUST suggest routes featuring AT LEAST TWO intermediate extension cities before returning home (e.g., Destination -> Ext City 1 -> Ext City 2 -> Home).
+9. **END-OF-PLAN HOTEL RECOMMENDATION**: 
+   - Rather than forcing a hotel on Day 1, analyze the clustered activities at the end of the itinerary and recommend 1 specific hotel in the `### 🏨 Recommended Accommodation` section.
+10. **ECONOMIC FEASIBILITY & CONSTANT MATH**:
+   - Auto-Budget: {state.get('auto_budget', False)}. If True, budget for a "Common Man" (3-star, public transit) in {state.get('currency', '$')}.
+   - **CONSTANT RATE**: The daily hotel cost in the budget table MUST be a flat, constant rate. DO NOT artificially inflate it.
 
-Top attractions in the destination:
-{state['attractions']}
+### 📝 EXACT STRUCTURE EXAMPLE (Follow strictly):
 
-Real-world travel distances and times between attractions:
-{state.get('travel_summary', 'Not available')}
+### Day 1: {state['departure_city']} to {state['destination']}
+*   **Transport**: [Flight/Train] to {state['destination']} (Based on Transit Data).
+*   **Transport**: Take a taxi from the airport/station to your central hotel.
 
-Verified Live Transit Schedules & Availability:
-{state.get('live_transit_schedules', 'No live schedules found.')}
+### Day X: [Neighborhood / Theme]
+*   **Transport**: Travel from your central hotel to **[Attraction 1]** ([km], [mins]).
+*   **09:00 AM - 11:30 AM**: Visit **[Attraction 1]**. *(Planned as part of your [Interest] interest)*.
+*   **12:00 PM - 01:00 PM**: Lunch at a local restaurant.
+*   **Transport**: Walk / Short taxi to **[Attraction 2]**.
+*   **01:30 PM - 04:00 PM**: Visit **[Attraction 2]**. *(Planned as part of your [Interest] interest)*.
+*   **04:30 PM - 06:00 PM**: Explore the local neighborhood or visit **[Attraction 3]**.
 
-Instructions:
-1. Day 1: Plan travel from {state['departure_city']} to {state['destination']}. **You MUST use the exact options provided in the "Verified Live Transit Schedules" section above**. DO NOT invent or guess specific flight/train numbers (e.g. Train 12039) or exact departure minutes. If there are NO schedules provided in the verified block, use realistic broad time blocks like "Morning Departure" or "Late Afternoon". Remind the user to check the "🎟️ Bookings" tab for live booking.
-2. Means of Transport: For EVERY leg of the journey (airport to hotel, hotel to attraction, city to city), **specify the means of transport** (e.g., "Take a regional train", "Hire a private cab", "Take the Metro"). Do not hallucinate exact local bus/train line numbers if you aren't certain.
-3. Travel Mode Rules for LONG-HAUL vs LOCAL:
-   - **Long-Haul (City to City)**: The user requested mode is THIS: "{state.get('travel_mode', 'Any')}".
-     **CRITICAL COMMAND**: You MUST build the main long-haul journey using the exact requested mode if it is physically possible by land (no oceans/closed borders), NO MATTER HOW LONG IT TAKES. Do NOT switch to a flight merely because a train/bus takes too long.
-     - If they chose **Train** or **Bus**, build the timeline utilizing that mode. Add a polite warning at the top estimating the extremely long travel time, stating that it compromises the number of attractions visited, and mentioning that a Flight would be faster/cheaper as a pure suggestion. But STILL generate the actual day-by-day steps based on their Train/Bus choice.
-     - If no direct trains/buses exist, strictly use connecting trains/buses and estimate the cost.
-   - **Local Travel (Within Destination City)**: Do NOT force the user's Long-Haul preference for local city transit. Always select the most feasible local option (e.g., Metro, Cab, walking) depending on real-world distance and availability inside the city limits.
-   - **If "Any"**: Choose the most reasonable long-haul option that is both cost-efficient and time-efficient.
-4. **Strict Trip Duration Enforcement:** You MUST generate a day-by-day plan that exactly spans from the Start Date ({state['start_date']}) to the End Date ({state['end_date']}). Do NOT cut the trip short!
-   - If you run out of provided attractions in '{state['destination']}' to fill the days, you MUST dynamically suggest day trips to neighboring cities within the same state, hidden regional gems, or relaxing leisure days to fill the timeline.
-5. **Accommodation/Hotel Suggestions:** Do NOT just vaguely say "the hotel". On Day 1, you MUST suggest a specific popular neighborhood or a specific highly-rated hotel name in '{state['destination']}' that matches the traveler's budget. Explicitly name it when they check in (e.g., "Check-in at the Taj West End" or "Check-in at a boutique hotel in Indiranagar").
-6. Consider weather conditions while planning outdoor activities.
-6. Respect the maximum given budget of ${state['budget']}. 
-   - **Grounding Math**: Use standard estimates: Flight ($600-$1000), Hotel ($100-$200/night), Food/Local ($50-$100/day). Note that domestic trains in places like India are much cheaper. Use realistic local costs based on the region.
-   - **Under Budget is Perfect**: Do NOT inflate prices or add unnecessary expenses (like switching from train to flight) merely to reach the user's budget! If your calculated total is lower than the user's budget, do NOT issue any budget warnings.
-   - **Over Budget Warning**: ONLY if the realistic *minimum* cost of the trip is strictly greater than the user's budget, add this explicitly at the very beginning: "⚠️ WARNING: Provided budget of ${state['budget']} is insufficient. A realistic budget would be approximately $X."
-   - **Remaining Budget Suggestions**: If the final total is comfortably below the user's budget, add a section at the very end (below the Budget Table) suggesting 1-2 famous shopping areas or premium activities in the destination to utilize their remaining budget. Only recommend things genuinely famous in that area.
-7. Include morning, afternoon, and evening activities.
-8. **Include Return Trip**: On the final day ({state['end_date']}), you MUST explicitly generate the return journey back to {state['departure_city']}, specifying the exact return airport/station and the final transportation mode. Do not forget this step.
-9. IF there is "Previous Feedback", address it specifically. Use its budget recommendations to achieve a stable, consistent plan.
+### Final Day: Return to {state['departure_city']}
+*   **Transport**: Travel to the station/airport.
+*   **Transport**: [Flight/Train] back to {state['departure_city']}.
 
-Return the itinerary clearly, including precise names of stations and transport lines, and end with a **Budget Table** in this format (keep the 3-column layout; use plain numbers in the last column like `1800` or `1142.50` without breaking across lines):
-| Category | Details | Cost ($) |
+### 🏨 Recommended Accommodation
+*   **Hotel [Name]** in [Neighborhood]: Highly recommended because it is centrally located to your clustered activities.
+
+### 💬 Extension Suggestions
+
+**📍 Single-City Extensions**
+*   **[City Name]** (~ [X] hours from [Destination], optimal stay: [Y] days): Known for [reason], including landmarks like [Example Landmark 1] and [Example Landmark 2].
+
+**🗺️ Multi-City Chained Routes**
+*   **Route Option 1:** [Destination] -> [Extension City 1] -> [Extension City 2] -> {state['departure_city']} (Total extra optimal stay: [Z] days). [Brief reason why this geographic route makes sense].
+
+Return the itinerary clearly and end with a **Budget Table** in this format:
+| Category | Details | Cost ({state.get('currency', '$')}) |
 | :--- | :--- | ---: |
-| Flights | ... | ... |
 | Accommodation | ... | ... |
 | Transport | ... | ... |
 | Food/Activity | ... | ... |
 | **Total** | | **SUM_OF_COSTS** |
-
-Double-check your math! The Total MUST be the exact sum of the items.
 """
 
     itinerary = generate_response(prompt)
     state["itinerary"] = itinerary
     return state
-# from utils.llm import generate_response
-
-# def create_itinerary(data):
-
-#     prompt = f"""
-# You are a professional travel planner.
-
-# Create a detailed day-by-day itinerary.
-
-# Departure city: {data['departure_city']}
-# Destination: {data['destination']}
-# Start date: {data['start_date']}
-# End date: {data['end_date']}
-# Budget: {data['budget']}
-# Number of travelers: {data['travelers']}
-# Interests: {data['interests']}
-
-# Rules:
-# - Include arrival travel from departure city
-# - Respect the budget
-# - Include morning, afternoon, evening activities
-# - Make travel realistic
-# - Include food suggestions
-
-# Return the result clearly formatted by day.
-# """
-
-#     itinerary = generate_response(prompt)
-
-#     return itinerary
-
-# /

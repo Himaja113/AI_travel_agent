@@ -14,9 +14,12 @@ class TravelState(TypedDict):
     budget: int
     travelers: int
     interests: List[str]
+    currency: str
+    auto_budget: bool
 
     attractions: list
     weather: dict
+    chat_history: list
     itinerary: str
     critique: str
     feedback_summary: str
